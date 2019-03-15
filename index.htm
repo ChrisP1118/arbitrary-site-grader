@@ -1,1 +1,392 @@
 
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+        <title>Arbitrary Site Grader</title>
+
+        <!-- Required Stylesheets -->
+        <link type="text/css" rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/lumen/bootstrap.min.css" />
+        <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css" />
+        <link type="text/css" rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+        <!-- Required scripts -->
+        <script src="https://unpkg.com/vue"></script>
+        <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
+        <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+
+        <style>
+            .card-header { font-size: 150%; }
+            .grade { font-size: 400%; font-weight: bold; }
+            .total-grade { font-size: 150%; }
+        </style>
+    </head>
+    <body>
+        <!-- Our application root element -->
+        <div id="app">
+            <b-container>
+
+                <b-navbar toggleable="md" type="dark" variant="primary">
+                    <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
+
+                    <b-navbar-brand href="#">
+                        Arbitrary Site Grader
+                    </b-navbar-brand>
+    
+                    <b-collapse is-nav id="nav_collapse">
+                        <b-navbar-nav class="ml-auto">
+                            <b-nav-item v-on:click="page = 'Home';">Home</b-nav-item>
+                            <b-nav-item v-on:click="page = 'FAQ';">FAQ</b-nav-item>
+                        </b-navbar-nav>
+                    </b-collapse>
+                </b-navbar>
+
+                <div v-if="page == 'Home'">
+                    <b-row>
+                        <b-col class="text-center">
+                            <b-jumbotron header="Arbitrary Site Grader" lead="We'll give your website an arbitrary grade without even looking at it">
+                                <p>Best of all, it's completely free!</p>
+                            </b-jumbotron>
+                        </b-col>
+                    </b-row>
+                    <b-row>
+                        <b-col>
+                            <b-alert :show="isScanning" variant="info" class="lead text-center"><i class="fas fa-spinner fa-pulse fa-3x"></i> Scanning: {{url}}</b-alert>
+                        </b-col>
+                    </b-row>
+                    <b-row v-if="!isDone && !isScanning">
+                        <b-col rows="2"></b-col>
+                        <b-col cols="8">
+                            <b-form-group description="Enter your site URL above, such as 'www.google.com', if you're Larry or Sergey." label="To get started, enter the URL of the site you want us to pretend to scan.">
+                                <b-input-group size="lg">
+                                    <b-input-group-text slot="prepend"><i class="fas fa-globe"></i></b-input-group-text>
+                                    <b-form-input v-model.trim="url"></b-form-input>
+                                    <b-input-group-append>
+                                        <b-button variant="primary" v-on:click="scanSite()">Scan Site</b-form-button>
+                                    </b-input-group-append>
+                                </b-input-group>
+                            </b-form-group>
+                            <b-form-checkbox v-model="goodGrade" inline>
+                                I really want a good grade
+                            </b-form-checkbox>
+                            <b-form-checkbox v-model="scanFast" inline>
+                                Fake scan my site quickly
+                            </b-form-checkbox>
+                            </b-col>
+                        <b-col cols="2"></b-col>
+                    </b-row>
+                    <b-row v-if="isDone" class="mb-3">
+                        <b-col cols="1"></b-col>
+                        <b-col cols="5" class="text-center">
+                            <h2>Scan Complete</h2>
+                            <p class="lead">{{url}}</p>
+                            <p>We've finished our pretend scan of your site.</p>
+                            <b-button v-on:click="resetScan()">Scan Another Site</b-button>
+                        </b-col>
+                        <b-col cols="5" class="total-grade">
+                            <b-card header="Total Grade"
+                                :header-bg-variant="totalGradeVariant"
+                                header-text-variant="white"
+                                align="center">
+                                <b-card-text>
+                                    <div class="grade">{{totalGrade}}</div>
+                                </b-card-text>
+                            </b-card>
+                        </b-col>
+                        <b-col cols="2"></b-col>
+                    </b-row>
+                    <b-row v-if="isDone">
+                        <b-col>
+                            <b-card-group>
+                                <b-card v-for="category in categories"
+                                    :header="category.title"
+                                    :header-bg-variant="category.gradeVariant"
+                                    header-text-variant="white"
+                                    align="center">
+                                    <b-card-text>
+                                        <div class="grade">{{category.grade}}</div>
+                                        <div>{{category.description}}</div>
+                                        <hr />
+                                        <div class="text-left">
+                                            <p>Your site:</p>
+                                            <ul>
+                                                <li v-for="bullet in category.goodBullets" class="text-success">
+                                                    {{bullet.text}} <a v-bind:href="bullet.url" v-if="bullet.url" target="_blank"><i class="fas fa-question-circle"></i></a>
+                                                </li>
+                                                <li v-for="bullet in category.badBullets" class="text-danger">
+                                                    {{bullet.text}} <a v-bind:href="bullet.url" v-if="bullet.url" target="_blank"><i class="fas fa-question-circle"></i></a>
+                                                </li>
+                                            </ul>
+                                            </div>
+                                    </b-card-text>
+                                </b-card>
+                            </b-card-group>
+                        </b-col>
+                    </b-row>
+                </div>
+
+                <div v-if="page == 'FAQ'">
+                    <b-row>
+                        <b-col>
+                            <h1>FAQ</h1>
+                            <h2>Is this a real scanner?</h2>
+                            <p>No. This is entirely fake.</p>
+                            <h2>So, what's the point of this?</h2>
+                            <p>I'm not sure.</p>
+                        </b-col>
+                    </b-row>
+                </div>
+    
+                <hr />
+                <b-row>
+                    <b-col class="text-left">
+                        <p>This site is meant as a joke. It does not really scan your site. Or do anything.</p>
+                    </b-col>
+                    <b-col class="text-right">
+                        <a href="https://github.com/ChrisP1118/arbitrary-site-grader" target="_blank"><i class="fab fa-github fa-lg"></i></a>
+                    </b-col>
+                </b-row>
+
+            </b-container>
+        </div>
+
+        <!-- Start running your app -->
+        <script>
+            window.app = new Vue({
+                el: '#app',
+                data: {
+                    page: 'Home',
+                    isDone: false,
+                    isScanning: false,
+                    goodGrade: false,
+                    scanFast: true,
+                    totalGrade: null,
+                    totalGradeVariant: null,
+                    totalGradeValue: null,
+                    categories: [
+                        {
+                            title: 'Security',
+                            description: 'Measures how lazy your developers are',
+                            allGoodBullets: [
+                                {
+                                    text: 'Claims to have "bank-grade security", which sounds impressive'
+                                },
+                                {
+                                    text: 'Displays a cool seal that says it\'s secure, which seems trustworthy',
+                                    url: 'https://www.troyhunt.com/heres-why-you-cant-trust-ssl-logos-on/'
+                                },
+                                {
+                                    text: 'Was created entirely by Bruce Schneier',
+                                    url: 'https://www.schneierfacts.com/'
+                                },
+                                {
+                                    text: 'Uses "correct horse battery staple" as an admin password',
+                                    url: 'https://xkcd.com/936/'
+                                },
+                                {
+                                    text: 'Ensures every password contains at least 1 uppercase letters, 2 numbers, 5 emojis, and the Greek letters of a fraternity'
+                                }
+                            ],
+                            allBadBullets: [
+                                {
+                                    text: 'Uses "password" as an admin password'
+                                },
+                                {
+                                    text: 'Contains source code written entirely in Russian. That seems like a bad sign'
+                                },
+                                {
+                                    text: 'Allows password managers to be used, which is obviously insecure',
+                                    url: 'https://www.wired.com/2015/07/websites-please-stop-blocking-password-managers-2015/'
+                                },
+                                {
+                                    text: 'Is going to help Brian Krebs win a Pulitzer Prize',
+                                    url: 'https://krebsonsecurity.com/about/'
+                                }
+                            ]
+                        },
+                        {
+                            title: 'Privacy',
+                            description: 'Measures you proximity to Europe or California',
+                            allGoodBullets: [
+                                {
+                                    text: 'Has a cookie consent banner that annoys every single user to your site',
+                                    url: 'https://www.troyhunt.com/these-cookie-warning-shenanigans-have-got-to-stop/'
+                                },
+                                {
+                                    text: 'Must be 100% GDPR compliant, since it has a cookie consent banner on it'
+                                },
+                                {
+                                    text: 'Allows users to opt out of each of the 247 tracking tags used on the site'
+                                },
+                                {
+                                    text: 'Respects the very effective and widely-supported "Do Not Track" header',
+                                    url: 'https://www.digitaltrends.com/computing/do-not-tracking-tools-do-nothing/'
+                                }
+                            ],
+                            allBadBullets: [
+                                {
+                                    text: 'Creates cookie to store whether or not the user accepts all cookies'
+                                },
+                                {
+                                    text: 'Is in the "Have I Been Pwned" hall of fame',
+                                    url: 'https://haveibeenpwned.com'
+                                },
+                                {
+                                    text: 'Includes an SSN in every URL for no apparent reason'
+                                },
+                                {
+                                    text: 'Has a small picture of Mark Zuckerberg staring at you in the bottom-right corner of every page'
+                                }
+                            ]
+                        },
+                        {
+                            title: 'Performance',
+                            description: 'Measures how many complaint calls you\'ll receive',
+                            allGoodBullets: [
+                                {
+                                    text: 'Minimizes and bundles all Flash files'
+                                },
+                                {
+                                    text: 'Keeps file sizes low by not having any useful content on the site'
+                                }
+                            ],
+                            allBadBullets: [
+                                {
+                                    text: 'Couldn\'t be reached from our Pyongyang-based servers'
+                                }
+                            ]
+                        },
+                        {
+                            title: 'SEO',
+                            description: 'Measures your digital marketing budget',
+                            allGoodBullets: [
+                                {
+                                    text: 'Is top ranked in Bing search results'
+                                },
+                                {
+                                    text: 'Is top ranked in AltaVista search results'
+                                }
+                            ],
+                            allBadBullets: [
+                                {
+                                    text: 'Doesn\'t appear in any search engine except Lycos'
+                                },
+                                {
+                                    text: 'Only has social media links to Friendster and Orkut'
+                                }
+                            ]
+                        },
+                        /*
+                        {
+                            title: 'Accessibility',
+                            description: 'Measures how many lawyers your organization employs',
+                            allGoodBullets: [
+                                {
+                                    text: 'All your img tags have alt text, even if it\'s just "lorem ipsum"'
+                                }
+                            ],
+                            allBadBullets: [
+                                {
+                                    text: 'There are obscenities hidden in white text on white background all over the site'
+                                }
+                            ]
+                        },
+                        {
+                            title: 'Experience',
+                            description: 'Measures how many lawyers your organization employs',
+                            allGoodBullets: [
+                                {
+                                    text: 'Uses a health dose of both <blink> and <marquee> tags'
+                                },
+                                {
+                                    text: 'Is endorsed by high-ranking government officials',
+                                    url: 'https://www.nytimes.com/2018/12/05/us/politics/rudy-giuliani-twitter-links.html'
+                                }
+                            ],
+                            allBadBullets: [
+                                {
+                                    text: 'Doesn\'t work correctly in Netscape 3.2'
+                                }
+                            ]
+                        }
+                        */
+                        ],
+                    url: 'https://www.google.com'
+                },
+                methods: {
+                    resetScan: function () {
+                        this.isDone = false;
+                        this.isScanning = false;
+                    },
+                    scanSite: function () {
+                        this.isDone = false;
+                        this.isScanning = true;
+                        setTimeout(() => {
+                            this.isScanning = false;
+                            this.isDone = true;
+
+                            this.categories.forEach(category => {
+                                category.gradeValue = this.goodGrade ? 0 : Math.floor(Math.random() * 11);
+                                category.grade = this.getGrade(category.gradeValue);
+                                category.gradeVariant = this.getGradeVariant(category.gradeValue);
+
+                                this.shuffleArray(category.allGoodBullets);
+                                this.shuffleArray(category.allBadBullets);
+
+                                numGood = category.gradeValue < 5 ? 5 : 10 - category.gradeValue;
+                                numBad = category.gradeValue > 5 ? 5 : category.gradeValue;
+
+                                category.goodBullets = category.allGoodBullets.slice(0, numGood);
+                                category.badBullets = category.allBadBullets.slice(0, numBad);
+                            });
+
+                            this.totalGradeValue = Math.floor(this.categories.reduce((total, category) => total + category.gradeValue, 0) / this.categories.length);
+                            this.totalGrade = this.getGrade(this.totalGradeValue);
+                            this.totalGradeVariant = this.getGradeVariant(this.totalGradeValue);
+                        }, this.scanFast ? 500 : 5000);
+                    },
+                    getGrade: function (gradeValue) {
+                        switch (gradeValue) {
+                            case 0: return 'A+';
+                            case 1: return 'A';
+                            case 2: return 'A-';
+                            case 3: return 'B+';
+                            case 4: return 'B';
+                            case 5: return 'B-';
+                            case 6: return 'C+';
+                            case 7: return 'C';
+                            case 8: return 'C-';
+                            case 9: return 'D';
+                            case 10: return 'F';
+                        }
+                        console.error('Invalid value passed to getGrade');
+                    },
+                    getGradeVariant: function (gradeValue) {
+                        if (gradeValue <= 2)
+                            return 'success';
+                        else if (gradeValue<= 5)
+                            return 'info';
+                        else if (gradeValue <=8)
+                            return 'warning';
+                        else
+                            return 'danger';
+
+                        console.error('Invalid value passed to getGradeVariant');
+                    },
+                    shuffleArray: function (array) {
+                        for (var i = array.length - 1; i > 0; i--) {
+                            var j = Math.floor(Math.random() * (i + 1));
+                            var temp = array[i];
+                            array[i] = array[j];
+                            array[j] = temp;
+                        }
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>
