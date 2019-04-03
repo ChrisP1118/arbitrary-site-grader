@@ -19,6 +19,8 @@
         <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
         <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
 
+        <script>if (location.protocol !== "https:") { location.protocol = "https:"; }</script>
+
         <style>
             .card-header { font-size: 150%; }
             .grade { font-size: 400%; font-weight: bold; }
@@ -136,7 +138,8 @@
                             <h2>Is this a real scanner?</h2>
                             <p>No. This is entirely fake.</p>
                             <h2>So, what's the point of this?</h2>
-                            <p>A lot of people rely on automated scanning tools without fully understanding what the tools can and cannot do.</p>
+                            <p>There are a lot of automated site scanning tools out there. They can be quite useful for developers, designers, and digital marketers who understand what they're really looking at and know what can and cannot tested automatically. However, these tools are often used by people who don't fully understand them, who just see their site distilled down to a single grade. This site really exists just to point out the absurdity of evaluating a site based on a single letter grade.</p>
+                            <p>Also, I had a few hours to kill and wanted to learn a bit more about VueJS, Jekyll, and GitHub Pages.</p>
                         </b-col>
                     </b-row>
                 </div>
@@ -169,7 +172,7 @@
                     totalGradeValue: null,
                     categories: [
                         {
-                            title: 'Security',
+                            title: 'Security and Privacy',
                             description: 'Measures how lazy your developers are',
                             allGoodBullets: [
                                 {
@@ -189,6 +192,20 @@
                                 },
                                 {
                                     text: 'Ensures every password contains at least 1 uppercase letters, 2 numbers, 5 emojis, and the Greek letters of a fraternity'
+                                },
+                                {
+                                    text: 'Has a cookie consent banner that annoys every single user to your site',
+                                    url: 'https://www.troyhunt.com/these-cookie-warning-shenanigans-have-got-to-stop/'
+                                },
+                                {
+                                    text: 'Has a cookie consent banner on it, so we\'re just going to go ahead and assume it\'s 100% GDPR compliant'
+                                },
+                                {
+                                    text: 'Allows users to opt out of each of the 247 tracking tags used on the site'
+                                },
+                                {
+                                    text: 'Respects the very effective and widely-supported "Do Not Track" header',
+                                    url: 'https://www.digitaltrends.com/computing/do-not-tracking-tools-do-nothing/'
                                 }
                             ],
                             allBadBullets: [
@@ -209,35 +226,9 @@
                                 {
                                     text: 'Has a security.txt file that just contains ASCII art of Rick Astley',
                                     url: 'https://securitytxt.org/'
-                                }
-                            ]
-                        },
-                        {
-                            title: 'Privacy',
-                            description: 'Measures you proximity to Europe or California',
-                            allGoodBullets: [
-                                {
-                                    text: 'Has a cookie consent banner that annoys every single user to your site',
-                                    url: 'https://www.troyhunt.com/these-cookie-warning-shenanigans-have-got-to-stop/'
                                 },
-                                {
-                                    text: 'Must be 100% GDPR compliant, since it has a cookie consent banner on it'
-                                },
-                                {
-                                    text: 'Allows users to opt out of each of the 247 tracking tags used on the site'
-                                },
-                                {
-                                    text: 'Respects the very effective and widely-supported "Do Not Track" header',
-                                    url: 'https://www.digitaltrends.com/computing/do-not-tracking-tools-do-nothing/'
-                                }
-                            ],
-                            allBadBullets: [
                                 {
                                     text: 'Creates cookie to store whether or not the user accepts all cookies'
-                                },
-                                {
-                                    text: 'Is in the "Have I Been Pwned" hall of fame',
-                                    url: 'https://haveibeenpwned.com'
                                 },
                                 {
                                     text: 'Includes an SSN in every URL for no apparent reason'
@@ -245,56 +236,47 @@
                                 {
                                     text: 'Has a small picture of Mark Zuckerberg staring at you in the bottom-right corner of every page'
                                 }
+
                             ]
                         },
                         {
-                            title: 'Performance',
-                            description: 'Measures how many complaint calls you\'ll receive',
+                            title: 'Performance and SEO',
+                            description: 'Measures whatever Google thinks is important today',
                             allGoodBullets: [
                                 {
                                     text: 'Minimizes and bundles all Flash files'
                                 },
                                 {
+                                    text: 'Ranks highly for every single keyword on Alta Vista'
+                                },
+                                {
                                     text: 'Keeps file sizes low by not having any useful content on the site'
+                                },
+                                {
+                                    text: 'Has links to all the best social media sites, like Friendster, Orkut, and MySpace'
                                 }
                             ],
                             allBadBullets: [
                                 {
                                     text: 'Couldn\'t be reached from our Pyongyang-based servers'
+                                },
+                                {
+                                    text: 'Appears to have personally offended Larry and Sergey, so it doesn\'t appear on Google at all'
+                                },
+                                {
+                                    text: 'Probably contains a whole lot of unnecessary JavaScript in assorted library files, just like every other site'
                                 }
                             ]
                         },
-                        /*
                         {
-                            title: 'SEO',
-                            description: 'Measures your digital marketing budget',
-                            allGoodBullets: [
-                                {
-                                    text: 'Is top ranked in Bing search results'
-                                },
-                                {
-                                    text: 'Is top ranked in AltaVista search results'
-                                }
-                            ],
-                            allBadBullets: [
-                                {
-                                    text: 'Doesn\'t appear in any search engine except Lycos'
-                                },
-                                {
-                                    text: 'Only has social media links to Friendster and Orkut'
-                                }
-                            ]
-                        },
-                        */
-                        {
-                            title: 'Experience',
+                            title: 'Accessibility and Experience',
                             description: 'Measures things that are nearly impossible to quantify',
                             allGoodBullets: [
                                 {
-                                    text: 'All your img tags have alt text, even if it\'s just "lorem ipsum"'
+                                    text: 'All your img tags have alt text, even though it\'s just "lorem ipsum"'
                                 },
                                 {
-                                    text: 'Uses a health dose of both <blink> and <marquee> tags'
+                                    text: 'Uses a healthy dose of both <blink> and <marquee> tags'
                                 },
                                 {
                                     text: 'Is endorsed by high-ranking government officials',
@@ -303,10 +285,13 @@
                             ],
                             allBadBullets: [
                                 {
-                                    text: 'There are obscenities hidden in white text on white background all over the site'
+                                    text: 'Has issues with screen readers due to the obscenities hidden in white text on white background all over the site'
                                 },
                                 {
                                     text: 'Doesn\'t work correctly in Netscape 3.2'
+                                },
+                                {
+                                    text: 'Uses the exact same WordPress theme as 387,294 other sites'
                                 }
                             ]
                         }
